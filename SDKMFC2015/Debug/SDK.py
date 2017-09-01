@@ -7,6 +7,7 @@ Created on Mon Jul 31 16:14:31 2017
 
 import ctypes as c
 #from numpy.ctypeslib import ndpointer
+import numpy as np
 
 # Python Library Helper Functions
 def ptListToBuff(ptList):
@@ -14,6 +15,12 @@ def ptListToBuff(ptList):
     s = ''.join(sL)
     buf = c.create_string_buffer(str.encode(s[:-1]))
     return buf
+  
+def getT(R, p):
+  pp = np.reshape(p, (1,-1))
+  a = np.hstack((R, pp.T))
+  b = np.hstack((np.zeros(3), 1))
+  return np.vstack((a, b))
 
 class SDKlib(object):
   def __init__(self, f):
@@ -44,8 +51,16 @@ class SDKlib(object):
     self.lib.constructAPointAtCircleCenter.restype = None
     
     self.lib.constructLine2Points.argtypes = [c.c_char_p, c.c_char_p, c.c_char_p, c.c_char_p, c.c_char_p, c.c_char_p, c.c_char_p, c.c_char_p]
+    
+    self.lib.constructFrame.argtypes = [c.c_char_p, c.c_char_p, np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags='C_CONTIGUOUS')]
+    self.lib.constructFrame.restype = None
+    
     self.lib.makePointNameRefListRuntimeSelect.argtypes = [c.c_char_p, c.c_int, c.c_char_p]
     self.lib.makePointNameRefListRuntimeSelect.restype = None
+    
+    self.lib.displayMsg.argtypes = [c.c_char_p]
+    self.lib.displayMsg.restypes = None
+    
     self.lib.test.argtypes = [c.c_char_p, c.c_int]
     self.lib.test.restype = None
     self.handle = self.lib._handle
@@ -100,6 +115,14 @@ class SDKlib(object):
   def ConstructLine2Points(self, lCol, lName, fPtCol, fPtObj,fPtTarg, sPtCol, sPtObj, sPtTarg):
     self.lib.constructLine2Points(str.encode(lCol),str.encode(lName),str.encode(fPtCol),str.encode(fPtObj),str.encode(fPtTarg),str.encode(sPtCol),str.encode(sPtObj),str.encode(sPtTarg))
     
+  def ConstructFrame(self, fCol, fName, T):
+    if (T.shape[0] != 4 or T.shape[1] != 4):
+      msg = "Transform wrong dimension"
+      print(msg)
+      self.DisplayMsg(msg)
+    else:
+      self.lib.constructFrame(str.encode(fCol), str.encode(fName), T)
+    
   def MakePointNameRefListRuntimeSelect(self, sz, msg):
     buf = c.create_string_buffer(sz)
     self.lib.makePointNameRefListRuntimeSelect(buf, c.c_int(sz), str.encode(msg))
@@ -118,6 +141,9 @@ class SDKlib(object):
   #Cloud Viewer Operations
   #Variables
   #Utility Operations
+   
+  def DisplayMsg(self, msg):
+    self.lib.displayMsg(str.encode(msg))
     
   def test(self, buf, sz):
     self.lib.test(buf, sz)
@@ -128,6 +154,9 @@ class SDKlib(object):
 if __name__ == "__main__":
   lib = SDKlib("SDKMFC2015.dll")
   ret = lib.connToSA()
-  lib.ConstructAPointAtCircleCenter('A', 'testCirc', 'A', 'B', 'cirCenter')
+  R = np.diag(np.ones(3, dtype = np.double))
+  P = np.array([100, 100, 100], dtype = np.double)
+  T = getT(R, P)
+  lib.ConstructFrame("hello", "you", T)
   ''' Must add this code to app that calls dll to free up dll '''
   lib.close()

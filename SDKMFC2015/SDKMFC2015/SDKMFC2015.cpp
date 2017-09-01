@@ -221,6 +221,12 @@ long connToSA() {
 	  CString sT = interp.convertCharStartToCString(sPtTarg);
 	  NrkSdk.constructLine2Points(lC, lN, fC, fO, fT, sC, sO, sT);
 	}
+  //Frames
+  void constructFrame(char* fCol, char* fName, double* T) {
+	  CString fC = interp.convertCharStartToCString(fCol);
+	  CString fN = interp.convertCharStartToCString(fName);
+	  NrkSdk.constructFrame(fC, fN, T);
+  }
   //Other MP Types
     void makePointNameRefListRuntimeSelect(char * buf, size_t sz, const char * msg) {
 	CString outMsg = interp.convertCharStartToCString(msg);
@@ -237,6 +243,10 @@ long connToSA() {
 //Cloud Viewer Operations
 //Variables
 //Utility Operations
+void displayMsg(char* msg) {
+	CString outMsg = interp.convertCharStartToCString(msg);
+	AfxMessageBox(outMsg);
+}
 void test(char * buf, int sz) {
 	CString msg = _T("running Test");
 	NrkSdk.getTest(buf, sz, msg);

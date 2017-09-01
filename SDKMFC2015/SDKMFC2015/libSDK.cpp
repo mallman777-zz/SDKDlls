@@ -87,13 +87,29 @@ libSDK::~libSDK()
 	  ExecuteStep();
   }
   //Lines
-    void libSDK::constructLine2Points(CString lnCol, CString lnNm, CString fPtCol, CString fPtObj, CString fPtTarg, CString sPtCol, CString sPtObj, CString sPtTarg) {
+  void libSDK::constructLine2Points(CString lnCol, CString lnNm, CString fPtCol, CString fPtObj, CString fPtTarg, CString sPtCol, CString sPtObj, CString sPtTarg) {
 		SetStep(_T("Construct Line 2 Points"));
 		SetCollectionObjectNameArg(_T("Line Name"), lnCol, lnNm);
 		SetPointNameArg(_T("First Point"), fPtCol, fPtObj, fPtTarg);
 		SetPointNameArg(_T("Second Point"), sPtCol, sPtObj, sPtTarg);
 		ExecuteStep();
       }
+  //Frames
+  void libSDK::constructFrame(CString fCol, CString fName, double * T) {
+		double sum = 0;
+		const int numRows = 4;
+		const int numCols = 4;
+		double TT[numRows][numCols];
+		for (int i = 0; i != numRows; ++i) {
+			for (int j = 0; j != numCols; ++j)
+				TT[i][j] = T[i*numRows + j];
+		}
+		SetStep(_T("Construct Frame"));
+		SetCollectionObjectNameArg(_T("New Frame Name"), fCol, fName);
+		SDKHelper helper(*this);
+		helper.SetTransformArgHelper(_T("Transform in Working Coordinates"), TT);
+		ExecuteStep();
+	}
   //Other MP Types
     void libSDK::getPointNameRefListRunTimeSelect(char * buf, size_t sz, CString msg) {
 	  SetStep(_T("Make a Point Name Ref List - Runtime Select"));

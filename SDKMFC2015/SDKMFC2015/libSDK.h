@@ -25,6 +25,8 @@ public:
 	  void constructAPointAtCircleCenter(CString cirCol, CString cirName, CString ptCol, CString ptObj, CString ptTarg);
 	  //Lines
 	  void constructLine2Points(CString lnCol, CString lnNm, CString fPtCol, CString fPtObj, CString fPtTarg, CString sPtCol, CString sPtObj, CString sPtTarg);
+	  //Frames
+	  void constructFrame(CString fCol, CString fName, double * T);
 	  //Other MP Types
 	    void getPointNameRefListRunTimeSelect(char * buf, size_t sz, CString msg);
 	//Analysis Operations

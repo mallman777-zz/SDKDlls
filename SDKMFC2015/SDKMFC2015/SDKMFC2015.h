@@ -57,8 +57,9 @@ SDKLIBRARY_API long connToSA();
   SDKLIBRARY_API void constructAPointAtCircleCenter(char * cirCol, char * cirName, char * ptCol, char * ptObj, char * ptTarg);
   //Lines
   SDKLIBRARY_API void constructLine2Points(char* lCol, char* lName, char* fPtCol, char* fPtObj, char* fPtTarg, char* sPtCol, char* sPtObj, char* sPtTarg);
+  SDKLIBRARY_API void constructFrame(char* fCol, char* fName, double* T);
   //Other MP Types
-    SDKLIBRARY_API void makePointNameRefListRuntimeSelect(char * buf, size_t sz, const char * msg);
+  SDKLIBRARY_API void makePointNameRefListRuntimeSelect(char * buf, size_t sz, const char * msg);
 	//Analysis Operations
 	//Reporting Operations
 	//Excel Direct Connect
@@ -70,6 +71,7 @@ SDKLIBRARY_API long connToSA();
 	//Cloud Viewer Operations
 	//Variables
 	//Utility Operations
+  SDKLIBRARY_API void displayMsg(char* msg);
 SDKLIBRARY_API void test(char * buf, int sz);
 
 

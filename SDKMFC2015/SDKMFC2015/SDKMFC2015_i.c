@@ -6,7 +6,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Thu Aug 24 14:31:37 2017
+/* at Fri Sep 01 11:01:54 2017
  */
 /* Compiler settings for SDKMFC2015.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
