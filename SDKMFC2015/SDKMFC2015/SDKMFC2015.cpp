@@ -253,6 +253,12 @@ long connToSA() {
 		CString fN = interp.convertCharStartToCString(fName);
 		NrkSdk.setWorkingFrame(fC, fN);
 	}
+	void deleteObjects(char * buf) {
+		CStringArray objs;
+		interp.copyBufferToCStringArray(objs, buf);
+		NrkSdk.deleteObjects(objs);
+	}
+
 void displayMsg(char* msg) {
 	CString outMsg = interp.convertCharStartToCString(msg);
 	AfxMessageBox(outMsg);

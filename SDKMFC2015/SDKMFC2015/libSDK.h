@@ -41,7 +41,8 @@ public:
 	//Cloud Viewer Operations
 	//Variables
 	//Utility Operations
-	   void setWorkingFrame(CString fCol, CString fName);
+		void setWorkingFrame(CString fCol, CString fName);
+		void deleteObjects(CStringArray &objs);
 	void getTest(char * buf, int sz, CString msg);
 };
 

@@ -150,6 +150,12 @@ libSDK::~libSDK()
 		SetCollectionObjectNameArg(_T("New Working Frame Name"), fCol, fName);
 		ExecuteStep();
 	}
+	void libSDK::deleteObjects(CStringArray &objs) {
+		SetStep(_T("Delete Objects"));
+		SDKHelper helper(*this);
+		helper.SetCollectionObjectNameRefListArgHelper(_T("Object Names"), objs);
+		ExecuteStep();
+	}
 void libSDK::getTest(char * buf, int sz, CString msg) {
 	SetStep(_T("Make a Point Name Ref List - Runtime Select"));
 	SetStringArg(_T("User Prompt"), msg);

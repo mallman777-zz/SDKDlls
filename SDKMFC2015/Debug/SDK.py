@@ -70,6 +70,9 @@ class SDKlib(object):
     self.lib.setWorkingFrame.argtypes = [c.c_char_p, c.c_char_p]
     self.lib.setWorkingFrame.restype = None
     
+    self.lib.deleteObjects.argtypes = [c.c_char_p]
+    self.lib.deleteObjects.restype = None
+    
     self.lib.displayMsg.argtypes = [c.c_char_p]
     self.lib.displayMsg.restypes = None
     
@@ -165,6 +168,14 @@ class SDKlib(object):
   
   def SetWorkingFrame(self, fCol, fName):
     self.lib.setWorkingFrame(str.encode(fCol), str.encode(fName))
+    
+  def DeleteObjects(self, objList):
+    if 'colObjName' in dir(objList[0]):
+      buf = objListToBuff(objList)
+      self.lib.deleteObjects(buf)
+    else:
+      msg = "Must Pass In List of SA Objects"
+      self.DisplayMsg(msg)
    
   def DisplayMsg(self, msg):
     self.lib.displayMsg(str.encode(msg))

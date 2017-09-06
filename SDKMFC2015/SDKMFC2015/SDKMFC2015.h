@@ -73,6 +73,8 @@ SDKLIBRARY_API long connToSA();
 	//Variables
 	//Utility Operations
   SDKLIBRARY_API void setWorkingFrame(char* fCol, char* fName);
+  SDKLIBRARY_API void deleteObjects(char * buf);
+  
   SDKLIBRARY_API void displayMsg(char* msg);
 SDKLIBRARY_API void test(char * buf, int sz);
 

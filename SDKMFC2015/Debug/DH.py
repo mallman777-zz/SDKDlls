@@ -23,6 +23,17 @@ def getTSaha(**params):
                 [0, 0, 0, 1]])
   return np.matrix(T)
 
+def getTSaha2(thetaVal, **params):
+  alpha = params['alpha']*degToRad
+  A = params['A']
+  D = params['D']
+  theta = thetaVal*degToRad
+  T = np.array([[m.cos(theta), -m.sin(theta)*m.cos(alpha), m.sin(theta)*m.sin(alpha), A*m.cos(theta)],
+                [m.sin(theta), m.cos(theta)*m.cos(alpha), -m.cos(theta)*m.sin(alpha), A*m.sin(theta)],
+                [0, m.sin(alpha), m.cos(alpha), D],
+                [0, 0, 0, 1]])
+  return np.matrix(T)
+
 def getTCraig(**params):
   alpha = params['alpha']*degToRad
   A = params['A']
