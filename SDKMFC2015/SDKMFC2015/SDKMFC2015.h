@@ -61,6 +61,7 @@ SDKLIBRARY_API long connToSA();
   //Other MP Types
   SDKLIBRARY_API void makePointNameRefListRuntimeSelect(char * buf, size_t sz, const char * msg);
 	//Analysis Operations
+  SDKLIBRARY_API void transformObjectsByDeltaAboutWorkingFrame(char * buf, double* T);
 	//Reporting Operations
 	//Excel Direct Connect
 	//MS Office Reporting Operations
@@ -71,6 +72,7 @@ SDKLIBRARY_API long connToSA();
 	//Cloud Viewer Operations
 	//Variables
 	//Utility Operations
+  SDKLIBRARY_API void setWorkingFrame(char* fCol, char* fName);
   SDKLIBRARY_API void displayMsg(char* msg);
 SDKLIBRARY_API void test(char * buf, int sz);
 

@@ -28,8 +28,9 @@ public:
 	  //Frames
 	  void constructFrame(CString fCol, CString fName, double * T);
 	  //Other MP Types
-	    void getPointNameRefListRunTimeSelect(char * buf, size_t sz, CString msg);
+	   void getPointNameRefListRunTimeSelect(char * buf, size_t sz, CString msg);
 	//Analysis Operations
+	   void transformObjectsByDeltaAboutWorkingFrame(CStringArray &objs, double* T);
 	//Reporting Operations
 	//Excel Direct Connect
 	//MS Office Reporting Operations
@@ -40,6 +41,7 @@ public:
 	//Cloud Viewer Operations
 	//Variables
 	//Utility Operations
+	   void setWorkingFrame(CString fCol, CString fName);
 	void getTest(char * buf, int sz, CString msg);
 };
 

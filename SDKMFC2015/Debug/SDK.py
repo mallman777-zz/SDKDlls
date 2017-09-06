@@ -16,6 +16,12 @@ def ptListToBuff(ptList):
     buf = c.create_string_buffer(str.encode(s[:-1]))
     return buf
   
+def objListToBuff(objList):
+  sL = [objList[i].colObjName + "," for i in range(len(objList))]
+  s = ''.join(sL)
+  buf = c.create_string_buffer(str.encode(s[:-1]))
+  return buf
+  
 def getT(R, p):
   pp = np.reshape(p, (1,-1))
   a = np.hstack((R, pp.T))
@@ -57,6 +63,12 @@ class SDKlib(object):
     
     self.lib.makePointNameRefListRuntimeSelect.argtypes = [c.c_char_p, c.c_int, c.c_char_p]
     self.lib.makePointNameRefListRuntimeSelect.restype = None
+    
+    self.lib.transformObjectsByDeltaAboutWorkingFrame.argtypes = [c.c_char_p, np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags='C_CONTIGUOUS')]
+    self.lib.transformObjectsByDeltaAboutWorkingFrame.restype = None
+    
+    self.lib.setWorkingFrame.argtypes = [c.c_char_p, c.c_char_p]
+    self.lib.setWorkingFrame.restype = None
     
     self.lib.displayMsg.argtypes = [c.c_char_p]
     self.lib.displayMsg.restypes = None
@@ -131,6 +143,15 @@ class SDKlib(object):
     return outStr.split(",")
   
   #Analysis Operations
+  
+  def TransformObjectsByDeltaAboutWorkingFrame(self, objList, T):
+    if 'colObjName' in dir(objList[0]):
+      buf = objListToBuff(objList)
+      self.lib.transformObjectsByDeltaAboutWorkingFrame(buf, T)
+    else:
+      msg = "Must Pass In List of SA Objects"
+      self.DisplayMsg(msg)
+      
   #Reporting Operations
   #Excel Direct Connect
   #MS Office Reporting Operations
@@ -141,6 +162,9 @@ class SDKlib(object):
   #Cloud Viewer Operations
   #Variables
   #Utility Operations
+  
+  def SetWorkingFrame(self, fCol, fName):
+    self.lib.setWorkingFrame(str.encode(fCol), str.encode(fName))
    
   def DisplayMsg(self, msg):
     self.lib.displayMsg(str.encode(msg))

@@ -172,7 +172,7 @@ long connToSA() {
 	  NrkSdk.getActiveCollectionName(buf, sz);
   }
   //Points and Groups
-	void constructPointFitToPoints(char * buf, char * ptCol, char * ptObj, char * ptTarg) {
+  void constructPointFitToPoints(char * buf, char * ptCol, char * ptObj, char * ptTarg) {
 	  CStringArray ptNameList;
 	  CString pC = interp.convertCharStartToCString(ptCol);
 	  CString pO = interp.convertCharStartToCString(ptObj);
@@ -180,13 +180,13 @@ long connToSA() {
 	  interp.copyBufferToCStringArray(ptNameList, buf);
 	  NrkSdk.constructPointFitToPoints(ptNameList, pC, pO, pT);
   }
-	void constructAPointInWorkingCoordinates(char * ptCol, char * ptObj, char * ptTarg, double x, double y, double z) {
+  void constructAPointInWorkingCoordinates(char * ptCol, char * ptObj, char * ptTarg, double x, double y, double z) {
 	  CString pC = interp.convertCharStartToCString(ptCol);
 	  CString pO = interp.convertCharStartToCString(ptObj);
 	  CString pT = interp.convertCharStartToCString(ptTarg);
 	  NrkSdk.constructAPointInWorkingCoordinates(pC, pO, pT, x, y, z);
 	}
-	void constructAPointAtLineMidPoint(char * lCol, char * lName, char * ptCol, char * ptObj, char * ptTarg) {
+  void constructAPointAtLineMidPoint(char * lCol, char * lName, char * ptCol, char * ptObj, char * ptTarg) {
 	  CString lC = interp.convertCharStartToCString(lCol);
 	  CString lN = interp.convertCharStartToCString(lName);
 	  CString pC = interp.convertCharStartToCString(ptCol);
@@ -194,14 +194,14 @@ long connToSA() {
 	  CString pT = interp.convertCharStartToCString(ptTarg);
 	  NrkSdk.constructAPointAtLineMidPoint(lC, lN, pC, pO, pT);
 	}
-	void constructAPointGroupFromPointNameRefList(char * buf, char * ptCol, char * ptObj) {
+  void constructAPointGroupFromPointNameRefList(char * buf, char * ptCol, char * ptObj) {
 	  CStringArray ptNameList;
 	  CString pC = interp.convertCharStartToCString(ptCol);
 	  CString pO = interp.convertCharStartToCString(ptObj);
 	  interp.copyBufferToCStringArray(ptNameList, buf);
 	  NrkSdk.constructAPointGroupFromPointNameRefList(ptNameList, pC, pO);
 	}
-	void constructAPointAtCircleCenter(char * cirCol, char * cirName, char * ptCol, char * ptObj, char * ptTarg) {
+  void constructAPointAtCircleCenter(char * cirCol, char * cirName, char * ptCol, char * ptObj, char * ptTarg) {
 		CString cC = interp.convertCharStartToCString(cirCol);
 		CString cN = interp.convertCharStartToCString(cirName);
 		CString pC = interp.convertCharStartToCString(ptCol);
@@ -228,11 +228,16 @@ long connToSA() {
 	  NrkSdk.constructFrame(fC, fN, T);
   }
   //Other MP Types
-    void makePointNameRefListRuntimeSelect(char * buf, size_t sz, const char * msg) {
+  void makePointNameRefListRuntimeSelect(char * buf, size_t sz, const char * msg) {
 	CString outMsg = interp.convertCharStartToCString(msg);
 	NrkSdk.getPointNameRefListRunTimeSelect(buf, sz, outMsg);
 }
 //Analysis Operations
+  void transformObjectsByDeltaAboutWorkingFrame(char * buf, double* T) {
+		CStringArray objs;
+		interp.copyBufferToCStringArray(objs, buf);
+		NrkSdk.transformObjectsByDeltaAboutWorkingFrame(objs, T);
+ }
 //Reporting Operations
 //Excel Direct Connect
 //MS Office Reporting Operations
@@ -243,6 +248,11 @@ long connToSA() {
 //Cloud Viewer Operations
 //Variables
 //Utility Operations
+	void setWorkingFrame(char* fCol, char* fName) {
+		CString fC = interp.convertCharStartToCString(fCol);
+		CString fN = interp.convertCharStartToCString(fName);
+		NrkSdk.setWorkingFrame(fC, fN);
+	}
 void displayMsg(char* msg) {
 	CString outMsg = interp.convertCharStartToCString(msg);
 	AfxMessageBox(outMsg);

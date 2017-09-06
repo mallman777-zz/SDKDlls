@@ -34,6 +34,17 @@ def getTCraig(**params):
                 [0, 0, 0, 1]])
   return np.matrix(T)
 
+def getTCraig2(thetaVal, **params):
+  alpha = params['alpha']*degToRad
+  A = params['A']
+  D = params['D']
+  theta = thetaVal*degToRad
+  T = np.array([[m.cos(theta), -m.sin(theta), 0, A],
+                [m.sin(theta)*m.cos(alpha), m.cos(theta)*m.cos(alpha), -m.sin(alpha), -m.sin(alpha)*D],
+                [m.sin(theta)*m.sin(alpha), m.cos(theta)*m.sin(alpha), m.cos(alpha), m.cos(alpha)*D],
+                [0, 0, 0, 1]])
+  return np.matrix(T)
+
 def getTbF(**DH):
   return getTCraig(**DH['S'])*getTCraig(**DH['L'])*getTCraig(**DH['U'])*getTCraig(**DH['R'])*getTCraig(**DH['B'])*getTCraig(**DH['T'])*getTCraig(**DH['F'])
 

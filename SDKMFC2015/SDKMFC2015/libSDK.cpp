@@ -96,7 +96,6 @@ libSDK::~libSDK()
       }
   //Frames
   void libSDK::constructFrame(CString fCol, CString fName, double * T) {
-		double sum = 0;
 		const int numRows = 4;
 		const int numCols = 4;
 		double TT[numRows][numCols];
@@ -122,6 +121,20 @@ libSDK::~libSDK()
 	  interp.copyCStringArrayToBuffer(buf, sz, ptNameList);
       }
 //Analysis Operations
+	void libSDK::transformObjectsByDeltaAboutWorkingFrame(CStringArray &objs, double* T) {
+		const int numRows = 4;
+		const int numCols = 4;
+		double TT[numRows][numCols];
+		for (int i = 0; i != numRows; ++i) {
+			for (int j = 0; j != numCols; ++j)
+				TT[i][j] = T[i*numRows + j];
+		}
+		SetStep(_T("Transform Objects by Delta (About Working Frame)"));
+		SDKHelper helper(*this);
+		helper.SetCollectionObjectNameRefListArgHelper(_T("Objects to Transform"), objs);
+		helper.SetTransformArgHelper(_T("Delta Transform"), TT);
+		ExecuteStep();
+	}
 //Reporting Operations
 //Excel Direct Connect
 //MS Office Reporting Operations
@@ -132,6 +145,11 @@ libSDK::~libSDK()
 //Cloud Viewer Operations
 //Variables
 //Utility Operations
+	void libSDK::setWorkingFrame(CString fCol, CString fName) {
+		SetStep(_T("Set Working Frame"));
+		SetCollectionObjectNameArg(_T("New Working Frame Name"), fCol, fName);
+		ExecuteStep();
+	}
 void libSDK::getTest(char * buf, int sz, CString msg) {
 	SetStep(_T("Make a Point Name Ref List - Runtime Select"));
 	SetStringArg(_T("User Prompt"), msg);
