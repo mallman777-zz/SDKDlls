@@ -64,6 +64,9 @@ class SDKlib(object):
     self.lib.makePointNameRefListRuntimeSelect.argtypes = [c.c_char_p, c.c_int, c.c_char_p]
     self.lib.makePointNameRefListRuntimeSelect.restype = None
     
+    self.lib.getWorkingTransformOfObjectFixedXYZ.argtypes = [c.c_char_p, c.c_char_p, np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags='C_CONTIGUOUS')]
+    self.lib.getWorkingTransformOfObjectFixedXYZ.restype = None
+    
     self.lib.transformObjectsByDeltaAboutWorkingFrame.argtypes = [c.c_char_p, np.ctypeslib.ndpointer(dtype=np.float64, ndim=2, flags='C_CONTIGUOUS')]
     self.lib.transformObjectsByDeltaAboutWorkingFrame.restype = None
     
@@ -144,6 +147,11 @@ class SDKlib(object):
     outStr = str(buf.value.decode())
     del(buf)
     return outStr.split(",")
+  
+  def GetWorkingTransformOfObjectFixedXYZ(self, col, name):
+    T = np.zeros((4,4), dtype = np.float)
+    self.lib.getWorkingTransformOfObjectFixedXYZ(str.encode(col), str.encode(name), T)
+    return T
   
   #Analysis Operations
   

@@ -232,6 +232,11 @@ long connToSA() {
 	CString outMsg = interp.convertCharStartToCString(msg);
 	NrkSdk.getPointNameRefListRunTimeSelect(buf, sz, outMsg);
 }
+  void getWorkingTransformOfObjectFixedXYZ(char * col, char * name, double * T) {
+	  CString c = interp.convertCharStartToCString(col);
+	  CString n = interp.convertCharStartToCString(name);
+	  NrkSdk.getWorkingTransformOfObjectFixedXYZ(c, n, T);
+  }
 //Analysis Operations
   void transformObjectsByDeltaAboutWorkingFrame(char * buf, double* T) {
 		CStringArray objs;

@@ -74,7 +74,7 @@ if __name__ == "__main__":
   
   chi = 1.01
   Ssa = {'alpha': 0, 'A': 0, 'D': 540} #(alpha, A, D, theta)
-  Lsa = {'alpha':90, 'A': 140, 'D': 1}
+  Lsa = {'alpha':90, 'A': 140, 'D': 0}
   Usa = {'alpha':0, 'A': 1150, 'D': 0}
   Rsa = {'alpha':90, 'A': 210, 'D': 1225}
   Bsa = {'alpha':90, 'A': 0, 'D': 0}
@@ -82,7 +82,7 @@ if __name__ == "__main__":
   Fsa = {'alpha':0, 'A': 0, 'D': 175}
   
   Smm = {'alpha': 0, 'A': 0, 'D': 540} #(alpha, A, D, theta)
-  Lmm = {'alpha':90, 'A': 140, 'D': 1}
+  Lmm = {'alpha':90, 'A': 140, 'D': 0}
   Umm = {'alpha':0, 'A': 1150, 'D': 0}
   Rmm = {'alpha':90, 'A': 210, 'D': 0}
   Bmm = {'alpha':-90, 'A': 0, 'D': 1225}
@@ -111,9 +111,9 @@ if __name__ == "__main__":
     input('hit enter to go to home pose \n')
     rSA.setPose(*homePoseSA)
     rMM.setPose(*homePoseMM)
+    '''
   #NrkSDK.DeleteCollection('rColSA')
   #NrkSDK.DeleteCollection('rColMM')
-  '''
   NrkSDK.close()
   
   

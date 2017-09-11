@@ -60,6 +60,7 @@ SDKLIBRARY_API long connToSA();
   SDKLIBRARY_API void constructFrame(char* fCol, char* fName, double* T);
   //Other MP Types
   SDKLIBRARY_API void makePointNameRefListRuntimeSelect(char * buf, size_t sz, const char * msg);
+  SDKLIBRARY_API void getWorkingTransformOfObjectFixedXYZ(char * col, char * name, double * T);
 	//Analysis Operations
   SDKLIBRARY_API void transformObjectsByDeltaAboutWorkingFrame(char * buf, double* T);
 	//Reporting Operations

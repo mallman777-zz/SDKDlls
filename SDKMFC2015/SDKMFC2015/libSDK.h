@@ -29,6 +29,7 @@ public:
 	  void constructFrame(CString fCol, CString fName, double * T);
 	  //Other MP Types
 	   void getPointNameRefListRunTimeSelect(char * buf, size_t sz, CString msg);
+	   void getWorkingTransformOfObjectFixedXYZ(CString col, CString name, double * T);
 	//Analysis Operations
 	   void transformObjectsByDeltaAboutWorkingFrame(CStringArray &objs, double* T);
 	//Reporting Operations

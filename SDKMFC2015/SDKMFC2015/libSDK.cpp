@@ -120,6 +120,20 @@ libSDK::~libSDK()
 	  interpret  interp;
 	  interp.copyCStringArrayToBuffer(buf, sz, ptNameList);
       }
+	void libSDK::getWorkingTransformOfObjectFixedXYZ(CString col, CString name, double * T) {
+		const int numRows = 4;
+		const int numCols = 4;
+		double TT[numRows][numCols];
+		SetStep(_T("Get Working Transform of Object (Fixed XYZ)"));
+		SetCollectionObjectNameArg(_T("Object Name"), col, name);
+		ExecuteStep();
+		SDKHelper helper(*this);
+		helper.GetTransformArgHelper(_T("Transform"), TT);
+		for (int i = 0; i != numRows; ++i) {
+			for (int j = 0; j != numCols; ++j)
+				T[i*numRows + j] = TT[i][j];
+		}
+	}
 //Analysis Operations
 	void libSDK::transformObjectsByDeltaAboutWorkingFrame(CStringArray &objs, double* T) {
 		const int numRows = 4;
