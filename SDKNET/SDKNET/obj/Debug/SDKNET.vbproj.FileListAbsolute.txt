@@ -1,0 +1,11 @@
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\bin\Debug\SDKNET.dll
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\bin\Debug\SDKNET.pdb
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\bin\Debug\SDKNET.xml
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\obj\Debug\SDKNET.vbprojResolveAssemblyReference.cache
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\obj\Debug\Interop.SpatialAnalyzerSDK.dll
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\obj\Debug\SDKNET.vbproj.ResolveComReference.cache
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\obj\Debug\SDKNET.Resources.resources
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\obj\Debug\SDKNET.vbproj.GenerateResource.Cache
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\obj\Debug\SDKNET.dll
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\obj\Debug\SDKNET.xml
+C:\Users\mallman\Documents\git\SDKDlls\SDKNET\SDKNET\obj\Debug\SDKNET.pdb
