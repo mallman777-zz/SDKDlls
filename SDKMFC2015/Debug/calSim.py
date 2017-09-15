@@ -29,12 +29,6 @@ def getResidual(x, *params):
   ret = np.sum((Tw - params[-1]['target'])**2)
   return ret
 
-def getDistance(R1, R2):
-  return np.sum((R1 - R2)**2)
-  
-def test(x, *args):
-  return (args[0] - x[0])**2 + (args[1] - x[1])**2
-
 if __name__ == "__main__":
   chi = 1.01
   Sr = {'alpha': 0, 'A': 0, 'D': 540} #(alpha, A, D, theta)
