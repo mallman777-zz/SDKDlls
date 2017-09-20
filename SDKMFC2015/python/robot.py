@@ -24,6 +24,7 @@ class robot(object):
     self.homePose = homePose
     self.kind = kind
     self.genRobot()
+    self.jointLimits = []
     
   def genRobot(self):
     if self.kind == 'SA':
@@ -70,6 +71,9 @@ class robot(object):
         self.linkFrames[jList[i]].setTWorld(Tw)
       self.currPose = pose
     pass
+  
+  def killRobot(self):
+    self.nrk.DeleteCollection(self.col)
         
 if __name__ == "__main__":
   
