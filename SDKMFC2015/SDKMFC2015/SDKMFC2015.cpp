@@ -125,16 +125,21 @@ STDAPI DllUnregisterServer(void)
 libSDK NrkSdk;
 interpret interp;
 
-long connToSA() {
-	//AFX_MANAGE_STATE(AfxGetStaticModuleState());
+SDKLIBRARY_API long connToSA() {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (!NrkSdk.CreateDispatch(_T("SpatialAnalyzerSDK.Application")))
 	{
-		AfxMessageBox(_T("Something Failed in OnCreate.  Added Macro"));
+		AfxMessageBox(_T("Something Failed in OnCreate."));
 		return -1;  // connection failed.
 	}
 	long statCode;
 	CString host = _T("localhost");
-	statCode = NrkSdk.Connect(host);
+	NrkSdk.ConnectEx(host, &statCode);
+	if (statCode){
+		CString msg;
+		msg.Format(_T("Connection Error, statCode: %d"), statCode);
+		AfxMessageBox(msg);
+	}
 	return statCode;
 }
 
@@ -143,14 +148,16 @@ long connToSA() {
 //MP Subroutines
 //View Control
 //Construction Operations
-  void copyObject(char * sColl, char * sName, char * destCol, char * destName, bool overwrite) {
+SDKLIBRARY_API void copyObject(char * sColl, char * sName, char * destCol, char * destName, bool overwrite) {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CString sC = interp.convertCharStartToCString(sColl);
 	CString sN = interp.convertCharStartToCString(sName);
 	CString dC = interp.convertCharStartToCString(destCol);
 	CString dN = interp.convertCharStartToCString(destName);
 	NrkSdk.copyObject(sC, sN, dC, dN, overwrite);
 }
-  void renamePoint(char* c1, char* o1, char* t1, char* c2, char* o2, char* t2, bool overwrite) {
+SDKLIBRARY_API  void renamePoint(char* c1, char* o1, char* t1, char* c2, char* o2, char* t2, bool overwrite) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CString C1 = interp.convertCharStartToCString(c1);
 	  CString O1 = interp.convertCharStartToCString(o1);
 	  CString T1 = interp.convertCharStartToCString(t1);
@@ -160,19 +167,23 @@ long connToSA() {
 	  NrkSdk.renamePoint(C1, O1, T1, C2, O2, T2, overwrite);
   }
   //Collections
-  void setOrConstructDefaultCollection(char* colName) {
+SDKLIBRARY_API  void setOrConstructDefaultCollection(char* colName) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CString cN = interp.convertCharStartToCString(colName);
 	  NrkSdk.setOrConstructDefaultCollection(cN);
   }
-  void deleteCollection(char * colName) {
+SDKLIBRARY_API  void deleteCollection(char * colName) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CString cN = interp.convertCharStartToCString(colName);
 	  NrkSdk.deleteCollection(cN);
   }
-  void getActiveCollectionName(char * buf, size_t sz) {
+SDKLIBRARY_API  void getActiveCollectionName(char * buf, size_t sz) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  NrkSdk.getActiveCollectionName(buf, sz);
   }
   //Points and Groups
-  void constructPointFitToPoints(char * buf, char * ptCol, char * ptObj, char * ptTarg) {
+SDKLIBRARY_API  void constructPointFitToPoints(char * buf, char * ptCol, char * ptObj, char * ptTarg) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CStringArray ptNameList;
 	  CString pC = interp.convertCharStartToCString(ptCol);
 	  CString pO = interp.convertCharStartToCString(ptObj);
@@ -180,13 +191,15 @@ long connToSA() {
 	  interp.copyBufferToCStringArray(ptNameList, buf);
 	  NrkSdk.constructPointFitToPoints(ptNameList, pC, pO, pT);
   }
-  void constructAPointInWorkingCoordinates(char * ptCol, char * ptObj, char * ptTarg, double x, double y, double z) {
+SDKLIBRARY_API  void constructAPointInWorkingCoordinates(char * ptCol, char * ptObj, char * ptTarg, double x, double y, double z) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CString pC = interp.convertCharStartToCString(ptCol);
 	  CString pO = interp.convertCharStartToCString(ptObj);
 	  CString pT = interp.convertCharStartToCString(ptTarg);
 	  NrkSdk.constructAPointInWorkingCoordinates(pC, pO, pT, x, y, z);
 	}
-  void constructAPointAtLineMidPoint(char * lCol, char * lName, char * ptCol, char * ptObj, char * ptTarg) {
+SDKLIBRARY_API  void constructAPointAtLineMidPoint(char * lCol, char * lName, char * ptCol, char * ptObj, char * ptTarg) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CString lC = interp.convertCharStartToCString(lCol);
 	  CString lN = interp.convertCharStartToCString(lName);
 	  CString pC = interp.convertCharStartToCString(ptCol);
@@ -194,23 +207,26 @@ long connToSA() {
 	  CString pT = interp.convertCharStartToCString(ptTarg);
 	  NrkSdk.constructAPointAtLineMidPoint(lC, lN, pC, pO, pT);
 	}
-  void constructAPointGroupFromPointNameRefList(char * buf, char * ptCol, char * ptObj) {
+SDKLIBRARY_API  void constructAPointGroupFromPointNameRefList(char * buf, char * ptCol, char * ptObj) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CStringArray ptNameList;
 	  CString pC = interp.convertCharStartToCString(ptCol);
 	  CString pO = interp.convertCharStartToCString(ptObj);
 	  interp.copyBufferToCStringArray(ptNameList, buf);
 	  NrkSdk.constructAPointGroupFromPointNameRefList(ptNameList, pC, pO);
 	}
-  void constructAPointAtCircleCenter(char * cirCol, char * cirName, char * ptCol, char * ptObj, char * ptTarg) {
-		CString cC = interp.convertCharStartToCString(cirCol);
-		CString cN = interp.convertCharStartToCString(cirName);
-		CString pC = interp.convertCharStartToCString(ptCol);
-		CString pO = interp.convertCharStartToCString(ptObj);
-		CString pT = interp.convertCharStartToCString(ptTarg);
-		NrkSdk.constructAPointAtCircleCenter(cC, cN, pC, pO, pT);
+SDKLIBRARY_API  void constructAPointAtCircleCenter(char * cirCol, char * cirName, char * ptCol, char * ptObj, char * ptTarg) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	  CString cC = interp.convertCharStartToCString(cirCol);
+	  CString cN = interp.convertCharStartToCString(cirName);
+	  CString pC = interp.convertCharStartToCString(ptCol);
+	  CString pO = interp.convertCharStartToCString(ptObj);
+	  CString pT = interp.convertCharStartToCString(ptTarg);
+	  NrkSdk.constructAPointAtCircleCenter(cC, cN, pC, pO, pT);
 	}
   //Lines
-  void constructLine2Points(char* lCol, char* lName, char* fPtCol, char* fPtObj, char* fPtTarg, char* sPtCol, char* sPtObj, char* sPtTarg) {
+SDKLIBRARY_API  void constructLine2Points(char* lCol, char* lName, char* fPtCol, char* fPtObj, char* fPtTarg, char* sPtCol, char* sPtObj, char* sPtTarg) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CString lC = interp.convertCharStartToCString(lCol);
 	  CString lN = interp.convertCharStartToCString(lName);
 	  CString fC = interp.convertCharStartToCString(fPtCol);
@@ -222,23 +238,27 @@ long connToSA() {
 	  NrkSdk.constructLine2Points(lC, lN, fC, fO, fT, sC, sO, sT);
 	}
   //Frames
-  void constructFrame(char* fCol, char* fName, double* T) {
+SDKLIBRARY_API  void constructFrame(char* fCol, char* fName, double* T) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CString fC = interp.convertCharStartToCString(fCol);
 	  CString fN = interp.convertCharStartToCString(fName);
 	  NrkSdk.constructFrame(fC, fN, T);
   }
   //Other MP Types
-  void makePointNameRefListRuntimeSelect(char * buf, size_t sz, const char * msg) {
+SDKLIBRARY_API  void makePointNameRefListRuntimeSelect(char * buf, size_t sz, const char * msg) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CString outMsg = interp.convertCharStartToCString(msg);
 	NrkSdk.getPointNameRefListRunTimeSelect(buf, sz, outMsg);
 }
-  void getWorkingTransformOfObjectFixedXYZ(char * col, char * name, double * T) {
+SDKLIBRARY_API  void getWorkingTransformOfObjectFixedXYZ(char * col, char * name, double * T) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	  CString c = interp.convertCharStartToCString(col);
 	  CString n = interp.convertCharStartToCString(name);
 	  NrkSdk.getWorkingTransformOfObjectFixedXYZ(c, n, T);
   }
 //Analysis Operations
-  void transformObjectsByDeltaAboutWorkingFrame(char * buf, double* T) {
+SDKLIBRARY_API  void transformObjectsByDeltaAboutWorkingFrame(char * buf, double* T) {
+	  AFX_MANAGE_STATE(AfxGetStaticModuleState());
 		CStringArray objs;
 		interp.copyBufferToCStringArray(objs, buf);
 		NrkSdk.transformObjectsByDeltaAboutWorkingFrame(objs, T);
@@ -253,22 +273,26 @@ long connToSA() {
 //Cloud Viewer Operations
 //Variables
 //Utility Operations
-	void setWorkingFrame(char* fCol, char* fName) {
+SDKLIBRARY_API	void setWorkingFrame(char* fCol, char* fName) {
+		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 		CString fC = interp.convertCharStartToCString(fCol);
 		CString fN = interp.convertCharStartToCString(fName);
 		NrkSdk.setWorkingFrame(fC, fN);
 	}
-	void deleteObjects(char * buf) {
+SDKLIBRARY_API	void deleteObjects(char * buf) {
+		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 		CStringArray objs;
 		interp.copyBufferToCStringArray(objs, buf);
 		NrkSdk.deleteObjects(objs);
 	}
 
-void displayMsg(char* msg) {
+SDKLIBRARY_API void displayMsg(char* msg) {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CString outMsg = interp.convertCharStartToCString(msg);
 	AfxMessageBox(outMsg);
 }
-void test(char * buf, int sz) {
+SDKLIBRARY_API void test(char * buf, int sz) {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CString msg = _T("running Test");
 	NrkSdk.getTest(buf, sz, msg);
 }

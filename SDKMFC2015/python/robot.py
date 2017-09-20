@@ -8,6 +8,7 @@ import DH
 import frame
 import SDK
 import numpy as np
+import os
 
 def getFirstNonZeroIdx(p1, p2):
   a = tuple(np.subtract(p1, p2))
@@ -93,7 +94,9 @@ if __name__ == "__main__":
   homePoseMM = (0,0,90,0,0,-90,0)
   dhParamsSA = {'S': Ssa, 'L': Lsa, 'U': Usa, 'R': Rsa, 'B': Bsa, 'T': Tsa, 'F': Fsa}
   dhParamsMM = {'S': Smm, 'L': Lmm, 'U': Umm, 'R': Rmm, 'B': Bmm, 'T': Tmm, 'F': Fmm}
-  NrkSDK = SDK.SDKlib("SDKMFC2015.dll")
+  path = "C:\\Users\\mallman\\Documents\\git\\SDKDlls\\SDKMFC2015\\Release"
+  dllFile = "SDKMFC2015.dll"
+  NrkSDK = SDK.SDKlib(os.path.join(path, dllFile))
   NrkSDK.connToSA()
   rSA = robot('rColSA', NrkSDK, 'SA', *homePoseSA, **dhParamsSA)
   rMM = robot('rColMM', NrkSDK, 'MM', *homePoseMM, **dhParamsMM)

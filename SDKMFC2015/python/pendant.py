@@ -1,6 +1,6 @@
 # A template for writing pyqt guis. This template will run without changes.  
 import sys
-import time, os, atexit, datetime, serial
+import time, os, atexit, datetime
 import numpy as np
 from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph as pg
@@ -13,6 +13,10 @@ import pyqtgraph.exporters.ImageExporter as IE
 import robot as rb
 import SDK
 
+def Cleanup():
+  NrkSDK.close()
+  pass
+  
 class complexParam(Parameter):
   def __init__(self, **opts):
     Parameter.__init__(self, **opts)
@@ -33,7 +37,12 @@ class complexParam(Parameter):
           
 class Pendant(object):
   def __init__(self, **opts):
-    self.NrkSDK = opts['NrkSDK']
+    self.NrkSDK = None
+    if 'NrkSDK' in opts.keys():
+      self.NrkSDK = opts['NrkSDK']
+    self.app = None
+    if 'QtApp' in opts.keys():
+      self.app = opts['QtApp']
     self.pTree = None
     self.parameters = None
     self.win = None
@@ -130,21 +139,26 @@ class Pendant(object):
 
   def runApp(self):
     self.parameters.sigTreeStateChanged.connect(self.change)
-    atexit.register(self.cleanup)
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-      QtGui.QApplication.instance().exec_()
-      
-  def cleanup(self):
-    pass
+      if not (self.app is None): 
+        self.app.exec_()
 
 if __name__ == '__main__':
-  app = QtGui.QApplication([])
-  NrkSDK = SDK.SDKlib("SDKMFC2015.dll")
-  NrkSDK.connToSA()
-  pendant = Pendant(NrkSDK = NrkSDK)
-  print('Now running SDK close')
-  NrkSDK.close()
-  print('close finished')
+  try:
+    app = QtGui.QApplication.instance()
+    if app is None:   #Qt cannot be called twice.  Checks if been created.  If so, doesn't create a new one.  Executes existing one on pendant.runApp()
+      app = QtGui.QApplication([])
+    else:
+      print('QApplication instance already exists: %s' % str(app))
+    path = "C:\\Users\\mallman\\Documents\\git\\SDKDlls\\SDKMFC2015\\Release"
+    dllFile = "SDKMFC2015.dll"
+    NrkSDK = SDK.SDKlib(os.path.join(path, dllFile))
+    NrkSDK.connToSA()
+    pendant = Pendant(NrkSDK = NrkSDK, QtApp = app)
+  finally:
+    Cleanup()
+  
+  
   
   
   

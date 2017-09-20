@@ -8,7 +8,7 @@
 #endif
 
 
-#ifdef SDKLIBRARY_EXPORTS  
+#ifdef SDKLIBRARY_EXPORTS  // This macro must be added to property sheet in project properties: C/C++ -> Preprocessor -> Preprocessor Definitions.  MSA 9/20/2017
 #define SDKLIBRARY_API extern "C" __declspec(dllexport)   
 #else  
 #define SDKLIBRARY_API extern "C" __declspec(dllimport)   
