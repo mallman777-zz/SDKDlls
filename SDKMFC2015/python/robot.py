@@ -8,15 +8,31 @@ import DH
 import frame
 import SDK
 import numpy as np
+import math as m
 import os
 
 def getFirstNonZeroIdx(p1, p2):
-  a = tuple(np.subtract(p1, p2))
-  return next((i for i,x in enumerate(a) if x), None)
+  if p1 ==  p2:
+    return 0
+  else:
+    print('p1:', p1)
+    print('p2:', p2)
+    a = tuple(np.subtract(p1, p2))
+    return next((i for i,x in enumerate(a) if x), None)
+
+degToRad = (np.pi/180)
 
 class robot(object):
-  def __init__(self, rCol, Nrk, kind, *homePose, **DH):
-    self.DHparams = DH
+  def __init__(self, rCol, Nrk, kind, *homePose, **params):
+    self.base = None
+    if 'base' in params.keys():
+      self.base = params['base']
+    self.Tbase = np.diag(np.ones(4, dtype = np.double))
+    self.setTbase()
+    self.tool = None
+    if 'tool' in params.keys():
+      self.tool = params['tool']
+    self.DHparams = params['DH']
     self.col = rCol
     self.linkFrames = {}
     self.nrk = Nrk
@@ -26,14 +42,27 @@ class robot(object):
     self.genRobot()
     self.jointLimits = []
     
+  def setTbase(self):
+    if not (self.base is None):
+      X = self.base['X']
+      Y = self.base['Y']
+      Z = self.base['Z']
+      rX = self.base['Rx']*degToRad
+      rY = self.base['Ry']*degToRad
+      rZ = self.base['Rz']*degToRad
+      self.Tbase = np.array([[m.cos(rZ)*m.cos(rY), m.cos(rZ)*m.sin(rY)*m.sin(rX) - m.sin(rZ)*m.cos(rX), m.cos(rZ)*m.sin(rY)*m.cos(rX) + m.sin(rZ)*m.sin(rX), X],
+                        [m.sin(rZ)*m.cos(rY), m.sin(rZ)*m.sin(rY)*m.sin(rX) + m.cos(rZ)*m.cos(rX), m.sin(rZ)*m.sin(rY)*m.cos(rX) - m.cos(rZ)*m.sin(rX), Y],
+                        [-m.sin(rY), m.cos(rY)*m.sin(rX), m.cos(rY)*m.cos(rX), Z],
+                        [0, 0, 0, 1]])
+    
   def genRobot(self):
-    if self.kind == 'SA':
-      jList = ['S', 'L', 'U', 'R', 'B', 'T', 'F']
-    else:
-      jList = ['S', 'L', 'U', 'R', 'B', 'T', 'F']
-    Tw = np.diag(np.ones(4, dtype = np.double))
-    params = {}
-    params['col'] = self.col
+    jList = ['S', 'L', 'U', 'R', 'B', 'T', 'F']
+    #Tw = np.diag(np.ones(4, dtype = np.double))
+    Tw = self.Tbase
+    params = {'col': self.col, 'name': 'base', 'TWold': Tw}
+    self.nrk.ConstructFrame(self.col, 'base', Tw)
+    #self.nrk.SetWorkingFrame(self.col, 'base')
+    self.linkFrames['base'] = frame.frame(**params)
     for j in range(len(self.DHparams)):
       if self.kind == 'SA':
         Tcurr = DH.getTCraig2(self.homePose[j], **self.DHparams[jList[j]])
@@ -43,34 +72,35 @@ class robot(object):
       params['name'] = jList[j]
       params['TWorld'] = Tw
       self.linkFrames[jList[j]] = frame.frame(**params)
-      self.nrk.ConstructFrame(self.col, jList[j], Tcurr)
-      self.nrk.SetWorkingFrame(self.col, jList[j])
-    self.nrk.SetWorkingFrame("A", "World")
+      self.nrk.ConstructFrame(self.col, jList[j], Tw)  # If use Tw here instead of Tcurr, dont have to do SetWorkingFrame Operations
+      #self.nrk.SetWorkingFrame(self.col, jList[j])
+    #self.nrk.SetWorkingFrame("A", "World")
     self.currPose = self.homePose
     
   def setPose(self, *pose):
-    if self.currPose == pose:
-      return
-    else:
+    jList = ['S', 'L', 'U', 'R', 'B', 'T', 'F']
+    start = getFirstNonZeroIdx(pose, self.currPose)
+    #print('start: ', jList[start])
+    Tw = self.Tbase
+    if start != 0:
+      Tw = self.linkFrames[jList[start - 1]].getTWorld()
+    for i in range(start, len(self.DHparams)):
       if self.kind == 'SA':
-        jList = ['S', 'L', 'U', 'R', 'B', 'T', 'F']
+        Tw = np.matmul(Tw, DH.getTCraig2(pose[i], **self.DHparams[jList[i]]))
       else:
-        jList = ['S', 'L', 'U', 'R', 'B', 'T', 'F']
-      start = getFirstNonZeroIdx(pose, self.currPose)
-      print('start: ', start)
-      Tw = np.diag(np.ones(4, dtype = np.double))
-      if start != 0:
-        Tw = self.linkFrames[jList[start - 1]].getTWorld()
-      for i in range(start, len(self.DHparams)):
-        if self.kind == 'SA':
-          Tw = np.matmul(Tw, DH.getTCraig2(pose[i], **self.DHparams[jList[i]]))
-        else:
-          Tw = np.matmul(Tw, DH.getTSaha2(pose[i], **self.DHparams[jList[i]]))
-        self.nrk.DeleteObjects([self.linkFrames[jList[i]]])
-        self.nrk.ConstructFrame(self.col, jList[i], Tw)
-        self.linkFrames[jList[i]].setTWorld(Tw)
-      self.currPose = pose
-    pass
+        Tw = np.matmul(Tw, DH.getTSaha2(pose[i], **self.DHparams[jList[i]]))
+      self.nrk.DeleteObjects([self.linkFrames[jList[i]]])
+      self.nrk.ConstructFrame(self.col, jList[i], Tw)
+      self.linkFrames[jList[i]].setTWorld(Tw)
+    self.currPose = pose
+  
+  def moveBase(self, **base):
+    self.base = base
+    self.setTbase()
+    self.nrk.DeleteObjects([self.linkFrames['base']])
+    self.nrk.ConstructFrame(self.col, self.linkFrames['base'].Name, self.Tbase)
+    self.setPose(*self.currPose)
+    self.linkFrames['base'].setTWorld(self.Tbase)
   
   def killRobot(self):
     self.nrk.DeleteCollection(self.col)

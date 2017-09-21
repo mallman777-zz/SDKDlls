@@ -22,20 +22,51 @@ class complexParam(Parameter):
   def __init__(self, **opts):
     Parameter.__init__(self, **opts)
     self.DH = {}
+    self.base = {}
+    self.tool = {}
     self.pose = ()
     self.setDH()
+    self.setBase()
+    self.setTool()
     self.setPose()
-    
+  
   def setDH(self):
     for c in self.children():
       if c.name() == 'Robot Params':
         for cc in c.children():
-          self.DH[cc.name()] = {cc.param('alpha').name(): cc.param('alpha').value(), cc.param('A').name(): cc.param('A').value(), cc.param('D').name(): cc.param('D').value()}
+          self.DH[cc.name()] = {cc.param('alpha').name(): cc.param('alpha').value(), 
+                  cc.param('A').name(): cc.param('A').value(), cc.param('D').name(): cc.param('D').value()}
+          
+  def setBase(self):
+    for c in self.children():
+      if c.name() == 'Extrinsic Params':
+        for cc in c.children():
+          if cc.name() == 'Base':
+            self.base = {cc.param('X').name(): cc.param('X').value(), 
+                         cc.param('Y').name(): cc.param('Y').value(), 
+                         cc.param('Z').name(): cc.param('Z').value(),
+                         cc.param('Rx').name(): cc.param('Rx').value(),
+                         cc.param('Ry').name(): cc.param('Ry').value(),
+                         cc.param('Rz').name(): cc.param('Rz').value()}
+    pass
+  
+  def setTool(self):
+    for c in self.children():
+      if c.name() == 'Extrinsic Params':
+        for cc in c.children():
+          if cc.name() == 'Tool':
+            self.tool = {cc.param('X').name(): cc.param('X').value(), 
+                         cc.param('Y').name(): cc.param('Y').value(), 
+                         cc.param('Z').name(): cc.param('Z').value(),
+                         cc.param('Rx').name(): cc.param('Rx').value(),
+                         cc.param('Ry').name(): cc.param('Ry').value(),
+                         cc.param('Rz').name(): cc.param('Rz').value()}
           
   def setPose(self):
     for c in self.children():
       if c.name() == 'Pose':
-        self.pose = (c.param('S').value(), c.param('L').value(), c.param('U').value(), c.param('R').value(), c.param('B').value(), c.param('T').value(), c.param('F').value())
+        self.pose = (c.param('S').value(), c.param('L').value(), c.param('U').value(), 
+                     c.param('R').value(), c.param('B').value(), c.param('T').value(), c.param('F').value())
                      
 class Pendant(object):
   def __init__(self, **opts):
@@ -56,6 +87,16 @@ class Pendant(object):
        
   def setupTree(self):
     params = [
+        {'name': 'Extrinsic Params', 'type': 'group', 'children': [
+            {'name': 'Base', 'type': 'group', 'children':[
+              {'name': 'X', 'type': 'float', 'value': 100},
+              {'name': 'Y', 'type': 'float', 'value': 100},
+              {'name': 'Z', 'type': 'float', 'value': 100},
+              {'name': 'Rx', 'type': 'float', 'value': 0},
+              {'name': 'Ry', 'type': 'float', 'value': 0},
+              {'name': 'Rz', 'type': 'float', 'value': 0},
+              ]}
+            ]},
         {'name':'Robot Params', 'type':'group', 'children': [
           {'name': 'S', 'type': 'group', 'children':[
                 {'name': 'alpha', 'type': 'float', 'value': 0},
@@ -102,8 +143,7 @@ class Pendant(object):
             {'name': 'T', 'type': 'float', 'value':0},
             {'name': 'F', 'type': 'float', 'value':0}]},
         {'name': 'numRobots', 'type': 'int', 'value': 0},
-        {'name': 'Add Robot', 'type': 'action'},
-        {'name': 'Move To Frame', 'type': 'action'}
+        {'name': 'Add Robot', 'type': 'action'}
       ]
     self.parameters = complexParam(name = 'params', type = 'group', children = params)
     self.pTree = ParameterTree()
@@ -124,19 +164,12 @@ class Pendant(object):
         self.parameters.setPose()
         if self.numRobots > 0:
           for r in self.robots:
-            r.setPose(*self.parameters.pose)
-      if 'Move To Frame' in childName:
-        targs = ['T0', 'T1', 'T2']
-        for t in targs:
-          T = self.NrkSDK.GetWorkingTransformOfObjectFixedXYZ('A', t)
+            r.setPose(*self.parameters.pose) 
+      if 'Extrinsic Params' in childName:
+        if self.numRobots > 0:
+          self.parameters.setBase()
           for r in self.robots:
-            p = cs.getPoseForFrame(T, r)
-            input('Hit Enter to Move to Target')
-            r.setPose(*p)
-        input('Go Home')
-        for r in self.robots:
-          r.setPose(*r.homePose)
-            
+            r.moveBase(**self.parameters.base)
     print('  parameter: %s'% childName)
     print('  change:    %s'% change)
     print('  data:      %s'% str(data))
@@ -144,7 +177,8 @@ class Pendant(object):
     
   def addRobot(self):
     rCol = 'r%d' % self.numRobots
-    self.robots.append(rb.robot(rCol, self.NrkSDK, 'SA', *self.parameters.pose, **self.parameters.DH))
+    rParams = {'base': self.parameters.base, 'DH': self.parameters.DH}
+    self.robots.append(rb.robot(rCol, self.NrkSDK, 'SA', *self.parameters.pose, **rParams))
     self.numRobots = len(self.robots)
     self.parameters.param('numRobots').setValue(self.numRobots)
     pass
