@@ -15,8 +15,6 @@ def getFirstNonZeroIdx(p1, p2):
   if p1 ==  p2:
     return 0
   else:
-    print('p1:', p1)
-    print('p2:', p2)
     a = tuple(np.subtract(p1, p2))
     return next((i for i,x in enumerate(a) if x), None)
 
@@ -32,7 +30,11 @@ class robot(object):
     self.tool = None
     if 'tool' in params.keys():
       self.tool = params['tool']
-    self.DHparams = params['DH']
+    if 'ID' in params.keys():
+      self.ID = params['ID']
+    self.DHparams = None
+    if 'DH' in params.keys():
+      self.DHparams = params['DH']
     self.col = rCol
     self.linkFrames = {}
     self.nrk = Nrk
@@ -84,12 +86,14 @@ class robot(object):
     Tw = self.Tbase
     if start != 0:
       Tw = self.linkFrames[jList[start - 1]].getTWorld()
+    fList = [self.linkFrames[jList[i]] for i in range(start, len(self.DHparams))]
+    self.nrk.DeleteObjects(fList)
     for i in range(start, len(self.DHparams)):
       if self.kind == 'SA':
         Tw = np.matmul(Tw, DH.getTCraig2(pose[i], **self.DHparams[jList[i]]))
       else:
         Tw = np.matmul(Tw, DH.getTSaha2(pose[i], **self.DHparams[jList[i]]))
-      self.nrk.DeleteObjects([self.linkFrames[jList[i]]])
+      #self.nrk.DeleteObjects([self.linkFrames[jList[i]]])
       self.nrk.ConstructFrame(self.col, jList[i], Tw)
       self.linkFrames[jList[i]].setTWorld(Tw)
     self.currPose = pose

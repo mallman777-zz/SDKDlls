@@ -31,6 +31,7 @@ class complexParam(Parameter):
     self.setPose()
   
   def setDH(self):
+    self.DH = {}
     for c in self.children():
       if c.name() == 'Robot Params':
         for cc in c.children():
@@ -79,10 +80,12 @@ class Pendant(object):
     self.pTree = None
     self.parameters = None
     self.win = None
+    self.numRobots = 0
+    self.activeRobot = 0
     self.setupTree()
     self.setupWindow()
     self.robots = []
-    self.numRobots = 0
+    self.robotIDs = []
     self.runApp()
        
   def setupTree(self):
@@ -142,8 +145,10 @@ class Pendant(object):
             {'name': 'B', 'type': 'float', 'value':90},
             {'name': 'T', 'type': 'float', 'value':0},
             {'name': 'F', 'type': 'float', 'value':0}]},
+        {'name': 'Add Robot', 'type': 'action'},
+        {'name': 'Update Robot', 'type': 'action'},
         {'name': 'numRobots', 'type': 'int', 'value': 0},
-        {'name': 'Add Robot', 'type': 'action'}
+        {'name': 'activeRobot', 'type': 'list', 'values': [0], 'value': 0}
       ]
     self.parameters = complexParam(name = 'params', type = 'group', children = params)
     self.pTree = ParameterTree()
@@ -158,18 +163,30 @@ class Pendant(object):
         childName = param.name()
       if childName == 'Add Robot':
         self.addRobot()
+      if childName == 'activeRobot':
+        self.activeRobot = self.parameters.param('activeRobot').value()
       if 'Robot Params' in childName:
         self.parameters.setDH()
+        if self.numRobots > 0:
+          if not (self.robots[self.activeRobot].DHparams == self.parameters.DH):
+            self.robots[self.activeRobot].DHparams = self.parameters.DH
+            self.robots[self.activeRobot].killRobot()
+            self.robots[self.activeRobot].genRobot()
       if 'Pose' in childName:
         self.parameters.setPose()
         if self.numRobots > 0:
-          for r in self.robots:
-            r.setPose(*self.parameters.pose) 
+          self.robots[self.activeRobot].setPose(*self.parameters.pose)
       if 'Extrinsic Params' in childName:
+        self.parameters.setBase()
         if self.numRobots > 0:
-          self.parameters.setBase()
-          for r in self.robots:
-            r.moveBase(**self.parameters.base)
+          self.robots[self.activeRobot].moveBase(**self.parameters.base)
+      if childName == 'Update Robot':
+        if self.numRobots > 0:
+          if not (self.robots[self.activeRobot].currPose == self.parameters.pose):
+            self.robots[self.activeRobot].setPose(*self.parameters.pose)
+          if not (self.robots[self.activeRobot].base == self.parameters.base):
+            self.robots[self.activeRobot].moveBase(**self.parameters.base)
+             
     print('  parameter: %s'% childName)
     print('  change:    %s'% change)
     print('  data:      %s'% str(data))
@@ -177,11 +194,16 @@ class Pendant(object):
     
   def addRobot(self):
     rCol = 'r%d' % self.numRobots
-    rParams = {'base': self.parameters.base, 'DH': self.parameters.DH}
+    rParams = {'base': self.parameters.base, 'DH': self.parameters.DH, 'ID': self.numRobots}
     self.robots.append(rb.robot(rCol, self.NrkSDK, 'SA', *self.parameters.pose, **rParams))
-    self.numRobots = len(self.robots)
-    self.parameters.param('numRobots').setValue(self.numRobots)
-    pass
+    self.robotIDs.append(self.numRobots)
+    with self.parameters.treeChangeBlocker():
+      self.parameters.removeChild(self.parameters.param('activeRobot'))
+      child = {'name': 'activeRobot', 'type': 'list', 'values': self.robotIDs, 'value': self.activeRobot}
+      self.parameters.addChild(child)
+      #self.parameters.param('activeRobot').setLimits(self.robotIDs)
+      self.numRobots = len(self.robots)
+      self.parameters.param('numRobots').setValue(self.numRobots)
 
   def setupWindow(self):
     self.win = QtGui.QMainWindow()
@@ -200,10 +222,7 @@ class Pendant(object):
 
   def runApp(self):
     self.parameters.sigTreeStateChanged.connect(self.change)
-    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-      if not (self.app is None): 
-        self.app.exec_()
-
+    
 if __name__ == '__main__':
   try:
     app = QtGui.QApplication.instance()
@@ -215,7 +234,10 @@ if __name__ == '__main__':
     dllFile = "SDKMFC2015.dll"
     NrkSDK = SDK.SDKlib(os.path.join(path, dllFile))
     NrkSDK.connToSA()
-    pendant = Pendant(NrkSDK = NrkSDK, QtApp = app)
+    pendant = Pendant(NrkSDK = NrkSDK)
+    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+      if not (app is None): 
+        app.exec_()
   finally:
     for r in pendant.robots:
       r.killRobot()
