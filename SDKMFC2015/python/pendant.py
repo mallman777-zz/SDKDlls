@@ -64,6 +64,7 @@ class complexParam(Parameter):
                          cc.param('Rz').name(): cc.param('Rz').value()}
           
   def setPose(self):
+    self.pose = ()
     for c in self.children():
       if c.name() == 'Pose':
         self.pose = (c.param('S').value(), c.param('L').value(), c.param('U').value(), 
@@ -92,9 +93,9 @@ class Pendant(object):
     params = [
         {'name': 'Extrinsic Params', 'type': 'group', 'children': [
             {'name': 'Base', 'type': 'group', 'children':[
-              {'name': 'X', 'type': 'float', 'value': 100},
-              {'name': 'Y', 'type': 'float', 'value': 100},
-              {'name': 'Z', 'type': 'float', 'value': 100},
+              {'name': 'X', 'type': 'float', 'value': 0},
+              {'name': 'Y', 'type': 'float', 'value': 0},
+              {'name': 'Z', 'type': 'float', 'value': 0},
               {'name': 'Rx', 'type': 'float', 'value': 0},
               {'name': 'Ry', 'type': 'float', 'value': 0},
               {'name': 'Rz', 'type': 'float', 'value': 0},
@@ -145,6 +146,7 @@ class Pendant(object):
             {'name': 'B', 'type': 'float', 'value':90},
             {'name': 'T', 'type': 'float', 'value':0},
             {'name': 'F', 'type': 'float', 'value':0}]},
+        {'name': 'robotType', 'type': 'list', 'values': ['SA', 'MM'], 'value': 'SA'},
         {'name': 'Add Robot', 'type': 'action'},
         {'name': 'Update Robot', 'type': 'action'},
         {'name': 'numRobots', 'type': 'int', 'value': 0},
@@ -165,6 +167,8 @@ class Pendant(object):
         self.addRobot()
       if childName == 'activeRobot':
         self.activeRobot = self.parameters.param('activeRobot').value()
+        with self.parameters.treeChangeBlocker():
+          self.setDisplay()
       if 'Robot Params' in childName:
         self.parameters.setDH()
         if self.numRobots > 0:
@@ -175,11 +179,13 @@ class Pendant(object):
       if 'Pose' in childName:
         self.parameters.setPose()
         if self.numRobots > 0:
-          self.robots[self.activeRobot].setPose(*self.parameters.pose)
+          if not (self.robots[self.activeRobot].currPose == self.parameters.pose):
+            self.robots[self.activeRobot].setPose(*self.parameters.pose)
       if 'Extrinsic Params' in childName:
         self.parameters.setBase()
         if self.numRobots > 0:
-          self.robots[self.activeRobot].moveBase(**self.parameters.base)
+          if not (self.robots[self.activeRobot].base == self.parameters.base):
+            self.robots[self.activeRobot].moveBase(**self.parameters.base)
       if childName == 'Update Robot':
         if self.numRobots > 0:
           if not (self.robots[self.activeRobot].currPose == self.parameters.pose):
@@ -192,12 +198,52 @@ class Pendant(object):
     print('  data:      %s'% str(data))
     print('  ----------')
     
+  def setDisplay(self):
+    r = self.robots[self.activeRobot]
+    self.parameters.param('robotType').setValue(r.kind)
+    self.parameters.param('Extrinsic Params').param('Base').param('X').setValue(r.base['X'])
+    self.parameters.param('Extrinsic Params').param('Base').param('Y').setValue(r.base['Y'])
+    self.parameters.param('Extrinsic Params').param('Base').param('Z').setValue(r.base['Z'])
+    self.parameters.param('Extrinsic Params').param('Base').param('Rx').setValue(r.base['Rx'])
+    self.parameters.param('Extrinsic Params').param('Base').param('Ry').setValue(r.base['Ry'])
+    self.parameters.param('Extrinsic Params').param('Base').param('Rz').setValue(r.base['Rz'])
+    self.parameters.param('Robot Params').param('S').param('alpha').setValue(r.DHparams['S']['alpha'])
+    self.parameters.param('Robot Params').param('S').param('A').setValue(r.DHparams['S']['A'])
+    self.parameters.param('Robot Params').param('S').param('D').setValue(r.DHparams['S']['D'])
+    self.parameters.param('Robot Params').param('L').param('alpha').setValue(r.DHparams['L']['alpha'])
+    self.parameters.param('Robot Params').param('L').param('A').setValue(r.DHparams['L']['A'])
+    self.parameters.param('Robot Params').param('L').param('D').setValue(r.DHparams['L']['D'])
+    self.parameters.param('Robot Params').param('U').param('alpha').setValue(r.DHparams['U']['alpha'])
+    self.parameters.param('Robot Params').param('U').param('A').setValue(r.DHparams['U']['A'])
+    self.parameters.param('Robot Params').param('U').param('D').setValue(r.DHparams['U']['D'])
+    self.parameters.param('Robot Params').param('R').param('alpha').setValue(r.DHparams['R']['alpha'])
+    self.parameters.param('Robot Params').param('R').param('A').setValue(r.DHparams['R']['A'])
+    self.parameters.param('Robot Params').param('R').param('D').setValue(r.DHparams['R']['D'])
+    self.parameters.param('Robot Params').param('B').param('alpha').setValue(r.DHparams['B']['alpha'])
+    self.parameters.param('Robot Params').param('B').param('A').setValue(r.DHparams['B']['A'])
+    self.parameters.param('Robot Params').param('B').param('D').setValue(r.DHparams['B']['D'])
+    self.parameters.param('Robot Params').param('T').param('alpha').setValue(r.DHparams['T']['alpha'])
+    self.parameters.param('Robot Params').param('T').param('A').setValue(r.DHparams['T']['A'])
+    self.parameters.param('Robot Params').param('T').param('D').setValue(r.DHparams['T']['D'])
+    self.parameters.param('Robot Params').param('F').param('alpha').setValue(r.DHparams['F']['alpha'])
+    self.parameters.param('Robot Params').param('F').param('A').setValue(r.DHparams['F']['A'])
+    self.parameters.param('Robot Params').param('F').param('D').setValue(r.DHparams['F']['D'])
+    self.parameters.param('Pose').param('S').setValue(r.currPose[0])
+    self.parameters.param('Pose').param('L').setValue(r.currPose[1])
+    self.parameters.param('Pose').param('U').setValue(r.currPose[2])
+    self.parameters.param('Pose').param('R').setValue(r.currPose[3])
+    self.parameters.param('Pose').param('B').setValue(r.currPose[4])
+    self.parameters.param('Pose').param('T').setValue(r.currPose[5])
+    self.parameters.param('Pose').param('F').setValue(r.currPose[6])
+    
+    
   def addRobot(self):
     rCol = 'r%d' % self.numRobots
     rParams = {'base': self.parameters.base, 'DH': self.parameters.DH, 'ID': self.numRobots}
-    self.robots.append(rb.robot(rCol, self.NrkSDK, 'SA', *self.parameters.pose, **rParams))
+    self.robots.append(rb.robot(rCol, self.NrkSDK, self.parameters.param('robotType').value(), *self.parameters.pose, **rParams))
     self.robotIDs.append(self.numRobots)
     with self.parameters.treeChangeBlocker():
+      self.activeRobot = self.numRobots
       self.parameters.removeChild(self.parameters.param('activeRobot'))
       child = {'name': 'activeRobot', 'type': 'list', 'values': self.robotIDs, 'value': self.activeRobot}
       self.parameters.addChild(child)
